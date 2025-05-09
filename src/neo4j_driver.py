@@ -104,14 +104,50 @@ class Neo4jDriver:
               summary=commit_details.summary,
               )
 
-    def create_relationship(self, from_id, to_id, rel_type):
+    def merge_get_import_status_node(self):
         with self.driver.session() as session:
-            query = """
-            MATCH (a), (b)
-            WHERE id(a) = $from_id AND id(b) = $to_id
-            CREATE (a)-[:%s]->(b)
-            """ % rel_type
-            session.run(query, from_id=from_id, to_id=to_id)
+            result = session.execute_write(self._create_and_return_import_status_node)
+            return result
+
+    @staticmethod
+    def _create_and_return_import_status_node(tx):
+        query = """
+        MERGE (a:ImportStatus)
+        ON CREATE SET 
+          a.git_import_complete = true,
+          a.next_complete = false
+        RETURN a.git_import_complete, a.next_complete
+        """
+        result = tx.run(query)
+        record = result.single()
+        return {
+            "git_import_complete": record["a.git_import_complete"],
+            "next_complete": record["a.next_complete"]
+        }
+
+    def get_import_status(self):
+        with self.driver.session() as session:
+            result = session.execute_read(self._get_import_status_node)
+            return result
+
+    @staticmethod
+    def _get_import_status_node(tx):
+        query = """
+        MATCH (a:ImportStatus)
+        RETURN a.git_import_complete, a.next_complete
+        """
+        result = tx.run(query)
+        record = result.single()
+        if record:
+            return {
+                "git_import_complete": record["a.git_import_complete"],
+                "next_complete": record["a.next_complete"]
+            }
+        else:
+            return {
+                "git_import_complete": False,
+                "next_complete": False
+            }
 
 if __name__ == "__main__":
     db = Neo4jDriver()
