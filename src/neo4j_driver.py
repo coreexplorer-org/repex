@@ -125,6 +125,23 @@ class Neo4jDriver:
             "next_complete": record["a.next_complete"]
         }
 
+    def insert_folder_level_details(self, data):
+        with self.driver.session() as session:
+            result = session.execute_write(self._insert_folder_level_details, data)
+            return result
+
+    @staticmethod
+    def _insert_folder_level_details(tx, data):
+        query = """
+        MERGE (file_detail_record:FileDetailRecord {master_sha_at_collection: $master_sha_at_collection, file_path: $file_path})
+        ON CREATE SET file_detail_record.json_blob = $json_blob
+        RETURN file_detail_record
+        """
+        json_blob = json.dumps(data)
+        result = tx.run(query, master_sha_at_collection=data['master_sha_at_collection'], file_path=data['file_paths'], json_blob=json_blob)
+        record = result.single()
+        return record["file_detail_record"]
+    
     def get_import_status(self):
         with self.driver.session() as session:
             result = session.execute_read(self._get_import_status_node)
@@ -148,6 +165,8 @@ class Neo4jDriver:
                 "git_import_complete": False,
                 "next_complete": False
             }
+
+
 
 if __name__ == "__main__":
     db = Neo4jDriver()
