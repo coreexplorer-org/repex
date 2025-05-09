@@ -52,8 +52,8 @@ see `neo4j_driver.py` in this repo for more details.
 ## dependencies
 
 these are found in requirements.txt
-
-`gitdb` https://gitdb.readthedocs.io/en/latest/
+`GitPython` https://gitpython.readthedocs.io/en/stable/reference.html#api-reference-toplevel
+<!-- `gitdb` https://gitdb.readthedocs.io/en/latest/ -->
 
 
 ## indexes created
