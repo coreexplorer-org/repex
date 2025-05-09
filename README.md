@@ -1,5 +1,26 @@
 # repo explore
 
+## UPDATE FOR USE WITH CORE KIT
+
+download the repository and add it to the 'bitcoin' folder in the root of this application
+
+e.g.
+├── docker-compose.yml
+├── Dockerfile
+├── README.md
+├── requirements.txt
+├── bitcoin <--- add it here
+└── src
+    ├── __init__.py
+    ├── commit_details.py
+    ├── config.py
+    ├── download.py
+    ├── git_processor.py
+    ├── main.py
+    └── neo4j_driver.py
+
+
+
 ## getting started
 
 1. run the database: `docker compose up -d`
