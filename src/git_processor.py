@@ -9,13 +9,6 @@ def merge_parents(db, commit):
     
 
 def process_commit(db: Neo4jDriver, commit: Commit):
-
-    # if len(commit.parents) > 0:
-    #     # breakpoint()
-    #     for parent in commit.parents:
-    #         print('parent processing')
-    #         process_commit(db, parent)
-
     # Create the humans
     committer = commit.committer
     author = commit.author
@@ -30,7 +23,6 @@ def process_commit(db: Neo4jDriver, commit: Commit):
         co_author_nodes.extend(db.merge_actor(co_author))
 
     db.merge_commit_step(commit, committer_node, author_node, co_author_nodes)
-    # print(f"commit {commit.hexsha}")
 
 def process_git_data():
     repo = Repo(config.LOCAL_REPO_PATH)
