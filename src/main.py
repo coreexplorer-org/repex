@@ -1,5 +1,5 @@
 # src/main.py
-from download import download_repository
+# from download import download_repository
 from git_processor import process_git_data
 
 def main():
