@@ -40,7 +40,54 @@ def process_git_data():
     else:
         print("Skipping initial data import.")
         # TODO: try for file details import
+        folder_path = "src/policy"
+        # folder_path = "src/policy/ephemeral_policy.cpp"
+        process_path_into_db(repo, db, folder_path)
+        process_path_into_db(repo, db, 'src/consensus')
+        process_path_into_db(repo, db, 'src/rpc/mempool.cpp')
+        # breakpoint()
+
     return
+
+def process_path_into_db(repo, db, folder_path):
+    relevant_data = find_relevant_commits(repo, folder_path)
+    db.insert_folder_level_details(relevant_data)
+
+def find_relevant_commits(repo, folder_or_file_path):
+# Get the list of commits for the specific folder path
+    commits_for_file = list(repo.iter_commits(all=True, paths=folder_or_file_path))
+
+    # Extract the required information
+    commits_info = []
+    unique_authors = set()
+
+    for commit in commits_for_file:
+        commit_info = {
+            'commit_hash': commit.hexsha,
+            'author_name': commit.author.name,
+            'author_email': commit.author.email,
+            'committed_date': commit.committed_datetime
+        }
+        commits_info.append(commit_info)
+        unique_authors.add(commit.author.name)
+
+    # Calculate additional metrics
+    unique_author_names = list(unique_authors)
+    length_of_unique_authors = len(unique_author_names)
+    length_of_all_commits = len(commits_info)
+    master_sha_at_collection = repo.heads.master.commit.hexsha
+    # breakpoint()
+
+    # Prepare the final result
+    result = {
+        'master_sha_at_collection': master_sha_at_collection,
+        'file_paths': folder_or_file_path,
+        # 'commits_info': commits_info,
+        'length_of_unique_authors': length_of_unique_authors,
+        'unique_author_names': unique_author_names,
+        'length_of_all_commits': length_of_all_commits
+    }
+    return result
 
 
 def find_commits_in_repo(repo):
