@@ -35,21 +35,21 @@ def process_commit(db: Neo4jDriver, commit: Commit):
 def process_git_data():
     repo = Repo(config.LOCAL_REPO_PATH)
     db = Neo4jDriver()
-    flags = find_processing_flags(db)
+    status_flag = db.get_import_status()
+    print("Import Process Status Result:", status_flag)
     # db.clear_database()
-    commits = find_commits_in_repo(repo)
-    if not flags['INITIAL_PROCESS_COMPLETE']:
+
+
+    if not status_flag['git_import_complete']:
+        commits = find_commits_in_repo(repo)
+        print("Performing initial data import...")
         initial_process_commits_into_db(db, commits)
+        db.merge_get_import_status_node()
     else:
-        update_commits_with_date_information(db, commits)
+        print("Skipping initial data import.")
+        # TODO: try for file details import
     return
 
-def find_processing_flags(db):
-    # TODO: let's look for the flags in the database
-    return {
-        'INITIAL_PROCESS_COMPLETE': True,
-        'PROCESS_COMMIT_DATES':     False,
-        }
 
 def find_commits_in_repo(repo):
     commits = list(repo.iter_commits())
@@ -57,18 +57,13 @@ def find_commits_in_repo(repo):
     commits.reverse()
     return commits
 
-def initial_process_commits_into_db(db, commits):
+def initial_process_commits_into_db(db: Neo4jDriver, commits):
+
     for commit in commits:
         process_commit(db, commit)
-    # TODO: set initial processing flag complete
     print(f"Processed {len(commits)} commits into Neo4j.")
     
     db.close()
-
-def update_commits_with_date_information(db: Neo4jDriver, commits: list[Commit]):
-    for commit in commits:
-        db.find_commit_and_add_date_details(commit)
-    return 
 
 if __name__ == "__main__":
     process_git_data()
