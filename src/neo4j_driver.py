@@ -104,20 +104,6 @@ class Neo4jDriver:
               summary=commit_details.summary,
               )
 
-    def find_commit_and_add_date_details(self, commit):
-        # open a driver session
-        # find the commit in the db
-        # Will `CommitDetails` support us for add date details to the commit?
-
-    def create_relationship(self, from_id, to_id, rel_type):
-        with self.driver.session() as session:
-            query = """
-            MATCH (a), (b)
-            WHERE id(a) = $from_id AND id(b) = $to_id
-            CREATE (a)-[:%s]->(b)
-            """ % rel_type
-            session.run(query, from_id=from_id, to_id=to_id)
-
 if __name__ == "__main__":
     db = Neo4jDriver()
     # db.clear_database() # TODO make it clear again
